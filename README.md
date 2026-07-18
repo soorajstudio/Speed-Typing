@@ -70,4 +70,4 @@ Speed-Typing/
 
 **Sooraj MS**
 
-GitHub: https://github.com/soorajdukesoft
+GitHub: https://github.com/soorajstudio
