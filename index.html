@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Keyflow — Typing Speed Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ── AMBIENT ── -->
+<div class="ambient-bg" aria-hidden="true">
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+</div>
+<div class="grid-overlay" aria-hidden="true"></div>
+
+<!-- ── APP ── -->
+<div class="app-shell">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d0e11" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+        </svg>
+      </div>
+      <span class="logo-text">key<span>flow</span></span>
+    </div>
+    <nav class="header-nav">
+      <button class="nav-pill">leaderboard</button>
+      <button class="nav-pill">settings</button>
+      <button class="nav-pill">profile</button>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero-section">
+    <div class="hero-eyebrow">typing speed test</div>
+  </section>
+
+  <!-- SETTINGS BAR -->
+  <div class="settings-bar" id="settingsBar">
+    <div class="settings-group" id="modeGroup">
+      <button class="settings-btn active" data-mode="time">time</button>
+      <button class="settings-btn" data-mode="words">words</button>
+      <button class="settings-btn" data-mode="quote">quote</button>
+    </div>
+    <div class="settings-divider"></div>
+    <div class="settings-group" id="configGroup"></div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div style="max-width:1000px;width:100%;" id="contentArea">
+
+    <!-- TYPING ENGINE -->
+    <div class="typing-wrapper" id="typingWrapper">
+
+      <!-- TIMER BAR -->
+      <div class="timer-bar">
+        <div class="timer-display" id="timerDisplay"></div>
+        <div class="timer-right">
+          <div class="live-stats" id="liveStats">
+            <div class="live-pill">wpm <span class="pill-val" id="liveWpm">0</span></div>
+          </div>
+          <button class="timer-toggle-btn" id="timerToggle" style="display:none">
+            <svg id="timerToggleIcon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+            <span id="timerToggleLabel">hide</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TYPING AREA -->
+      <div class="typing-area-wrap" id="typingAreaWrap">
+
+        <!-- START OVERLAY -->
+        <div class="start-overlay" id="startOverlay">
+          <div class="start-hint">tap start or click to begin</div>
+          <button class="start-btn" id="startBtn">Start Test</button>
+        </div>
+
+        <input id="hiddenInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+          inputmode="text"
+          style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;z-index:1;" />
+
+        <div class="words-container blurred" id="wordsContainer"></div>
+        <div class="caret" id="caret" style="display:none;"></div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
+
+      <!-- KBD HINT -->
+      <div class="kbd-hint" id="kbdHint">tab + enter to restart &nbsp;|&nbsp; tap screen to refocus</div>
+    </div>
+
+    <!-- DASHBOARD (hidden until test ends) -->
+    <div class="dashboard-wrap" id="dashboardWrap">
+      <div class="dashboard-top">
+        <div class="main-stats">
+          <div class="stat-block">
+            <div class="stat-label">wpm</div>
+            <div class="stat-value" id="dashWpm">0</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-label">accuracy</div>
+            <div class="stat-value" id="dashAcc">0<span class="stat-unit">%</span></div>
+          </div>
+          <div class="grade-badge">
+            <div class="grade-letter" id="dashGrade">—</div>
+            <div class="grade-tag">grade</div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="wpmChart"></canvas>
+        </div>
+      </div>
+
+      <div class="dashboard-details">
+        <div class="detail-card">
+          <div class="detail-label">test type</div>
+          <div class="detail-value mono" id="dashTestType">—</div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-label">raw</div>
+          <div class="detail-value" id="dashRaw">0</div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-label">characters</div>
+          <div class="detail-value mono" id="dashChars">0/0/0/0</div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-label">consistency</div>
+          <div class="detail-value" id="dashConsistency">0<span style="font-size:1rem;color:var(--text-secondary)">%</span></div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-label">time</div>
+          <div class="detail-value" id="dashTime">0<span style="font-size:1rem;color:var(--text-secondary)">s</span></div>
+        </div>
+      </div>
+
+      <div class="dashboard-actions">
+        <button class="action-btn" id="restartBtn">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+          </svg>
+          restart test
+        </button>
+        <button class="action-btn" id="shareBtn">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+            <polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+          </svg>
+          share result
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">keyflow · built for speed</footer>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
